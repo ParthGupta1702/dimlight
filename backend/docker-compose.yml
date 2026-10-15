@@ -1,0 +1,22 @@
+# MongoDB for dimlight, run through Docker Desktop.
+#   npm run db:up     start it (waits until it is ready)
+#   npm run db:down   stop it (your data is kept in the volume)
+# Data lives in the named volume "dimlight-mongo-data". Remove it too with: docker compose down -v
+services:
+  mongo:
+    image: mongo:7
+    container_name: dimlight-mongo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"   # only reachable from your own computer
+    volumes:
+      - dimlight-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+volumes:
+  dimlight-mongo-data:
