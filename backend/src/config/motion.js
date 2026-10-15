@@ -22,6 +22,7 @@ module.exports = () => ({
     seatLiveUpdate: { type: 'pulse', duration: 400 }, // when SSE says another user took a seat
     bookingConfirm: { type: 'check-draw', duration: 600 },
   },
+  popcorn: { pieces: 7, durationMs: 800 }, // pop when a seat is picked
   hero: { autoplayMs: 7000, slideDistancePx: 28, slideDuration: 650, bulbsOnMs: 1400 }, // featured-movies marquee
   seatHold: { seconds: holdMinutes * 60, warnAtSeconds: 60 }, // drive the countdown ring
   payment: { processingMinMs: paymentDelay, successHoldMs: 900 }, // show spinner at least this long

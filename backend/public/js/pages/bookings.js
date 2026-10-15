@@ -1,5 +1,6 @@
 import { h, poster, money, fmtDateTime } from '../dom.js';
 import { api, session } from '../api.js';
+import { bucket } from '../snacks.js';
 
 const FILTERS = ['', 'Paid', 'Pending', 'Cancelled', 'Expired'];
 
@@ -17,7 +18,7 @@ export default async function bookings({ go }) {
     try {
       const d = await api('GET', '/bookings/my?limit=50' + (status ? `&status=${status}` : ''));
       if (!d.bookings.length) {
-        list.replaceChildren(h('div', { class: 'empty' }, h('h2', {}, status ? `No ${status.toLowerCase()} bookings` : 'No bookings yet'), h('p', {}, 'Pick a movie and your tickets will show up here.'), h('a', { class: 'btn', href: '#/' }, 'Browse movies')));
+        list.replaceChildren(h('div', { class: 'empty' }, h('div', { class: 'empty-art' }, bucket({ size: 78 }).el), h('h2', {}, status ? `No ${status.toLowerCase()} bookings` : 'No bookings yet'), h('p', {}, 'Pick a movie and your tickets will show up here.'), h('a', { class: 'btn', href: '#/' }, 'Browse movies')));
         return;
       }
       list.replaceChildren(

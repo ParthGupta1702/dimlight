@@ -2,6 +2,7 @@
 export let motion = {
   durations: { instant: 80, fast: 150, base: 250, slow: 400, page: 450 },
   stagger: { movieCards: 60, showtimes: 40, seatRows: 50 },
+  popcorn: { pieces: 7, durationMs: 800 },
   hero: { autoplayMs: 7000, slideDistancePx: 28, slideDuration: 650, bulbsOnMs: 1400 },
   seatHold: { seconds: 300, warnAtSeconds: 60 },
   payment: { processingMinMs: 1200, successHoldMs: 900 },

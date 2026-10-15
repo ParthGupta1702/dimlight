@@ -1,6 +1,7 @@
 import { h, toast } from './dom.js';
 import { api, session } from './api.js';
 import { loadMotion } from './motion.js';
+import { bucket, colaCup, spilledBucket } from './snacks.js';
 
 // Pages are loaded on demand. Each default export: async ({ params, query, onLeave, go }) => Node
 const routes = [
@@ -79,6 +80,7 @@ async function render() {
     if (token !== renderToken) return;
     app.replaceChildren(
       h('section', { class: 'empty' },
+        spilledBucket(),
         h('h2', {}, err.status === 404 ? 'Not found' : 'Could not load this page'),
         h('p', {}, err.message || 'Something went wrong.'),
         h('p', {}, h('a', { class: 'btn', href: '#/' }, 'Back to movies'), ' ', h('button', { class: 'btn ghost', onclick: render }, 'Try again'))
@@ -104,8 +106,26 @@ window.addEventListener('hashchange', render);
 window.addEventListener('session-changed', () => renderChrome(parseHash().path));
 
 // keep the token fresh: if it expired, the next API call clears it and the header updates
+function renderFooter() {
+  const foot = document.getElementById('foot');
+  if (!foot) return;
+  foot.replaceChildren(
+    h('div', { class: 'foot-inner' },
+      h('div', { class: 'foot-snacks', 'aria-hidden': 'true' }, bucket({ size: 54, fill: 6 }).el, colaCup({ size: 36, fizz: false }).el),
+      h('div', {},
+        h('p', { class: 'foot-logo' }, 'dimlight'),
+        h('p', { class: 'foot-line' }, 'Grab your popcorn, the lights are going down.')
+      ),
+      h('nav', { class: 'foot-links', 'aria-label': 'Footer' },
+        h('a', { href: '#/' }, 'Movies'), h('a', { href: '#/bookings' }, 'My bookings'), h('a', { href: '#/admin/login' }, 'Staff sign in')
+      )
+    )
+  );
+}
+
 (async function start() {
   await loadMotion();
+  renderFooter();
   if (session.get()) api('GET', '/auth/me').catch(() => {});
   render();
 })();

@@ -1,5 +1,7 @@
 import { h, toast, money, fmtDateTime } from '../dom.js';
 import { api, session } from '../api.js';
+import { popBurst, bucket } from '../snacks.js';
+import { reducedMotion } from '../motion.js';
 
 export default async function seatsPage({ params, onLeave, go }) {
   const id = params.id;
@@ -16,6 +18,7 @@ export default async function seatsPage({ params, onLeave, go }) {
   const picked = h('div', { class: 'picked' });
   const total = h('div', { class: 'total' });
   const cta = h('button', { class: 'btn', onclick: hold }, 'Hold seats');
+  const meter = bucket({ size: 46 }); // fills with one popcorn puff per seat picked
   const liveEl = h('span', { class: 'live off' }, 'Connecting');
   let holding = false; // our own hold is announced to everyone, including us - ignore it
 
@@ -37,6 +40,7 @@ export default async function seatsPage({ params, onLeave, go }) {
   function summary() {
     const labels = [...selected].map((sid) => info.get(sid).label).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     picked.textContent = labels.length ? `Seats: ${labels.join(', ')}` : `Pick up to ${max} seats`;
+    meter.set(labels.length);
     total.textContent = labels.length ? money(price * labels.length) : '';
     cta.disabled = !labels.length;
     cta.textContent = session.isUser ? 'Hold seats' : session.isAdmin ? 'Admins cannot book' : 'Sign in to book';
@@ -72,6 +76,11 @@ export default async function seatsPage({ params, onLeave, go }) {
     else {
       if (selected.size >= max) return toast(`You can book up to ${max} seats at a time`, 'error');
       selected.add(sid);
+      // pop! a few kernels burst out of the seat you picked
+      btn.classList.remove('popped');
+      void btn.offsetWidth;
+      btn.classList.add('popped');
+      popBurst(btn);
     }
     paint(sid);
     summary();
@@ -84,7 +93,10 @@ export default async function seatsPage({ params, onLeave, go }) {
     cta.replaceChildren(h('span', { class: 'spinner' }), 'Holding seats');
     try {
       const r = await api('POST', '/bookings', { showtime_id: id, seat_ids: [...selected] });
-      go(`/checkout/${r.booking.booking_id}`);
+      // seats are yours: a bigger burst from the bucket, then on to checkout
+      cta.replaceChildren('Seats held');
+      popBurst(meter.el, { pieces: 16, spread: 150, lift: 130, size: 28 });
+      setTimeout(() => go(`/checkout/${r.booking.booking_id}`), reducedMotion ? 0 : 520);
     } catch (err) {
       holding = false;
       toast(err.message, 'error');
@@ -118,7 +130,6 @@ export default async function seatsPage({ params, onLeave, go }) {
   onLeave(() => es && es.close());
 
   apply(data);
-  const sum = data.summary;
   return h('section', {},
     h('a', { class: 'back', href: `#/movie/${st.movie_id}` }, 'Back to showtimes'),
     h('div', { class: 'show-head' },
@@ -133,7 +144,7 @@ export default async function seatsPage({ params, onLeave, go }) {
     ),
     h('div', { class: 'hall' }, h('div', { class: 'screen' }, 'Screen this way'), grid),
     h('div', { class: 'card awn bar' },
-      h('div', {}, picked, total),
+      h('div', { class: 'bar-left' }, meter.el, h('div', {}, picked, total)),
       cta
     )
   );

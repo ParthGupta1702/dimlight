@@ -1,6 +1,7 @@
 import { h, poster, duration } from '../dom.js';
 import { api } from '../api.js';
 import { heroSection } from '../hero.js';
+import { bucket } from '../snacks.js';
 
 export function movieCard(m, i) {
   return h('article', { class: 'card awn movie', style: { '--i': i } },
@@ -52,6 +53,7 @@ export default async function movies({ query, onLeave }) {
       if (!d.count) {
         grid.replaceChildren(
           h('div', { class: 'empty', style: { gridColumn: '1 / -1' } },
+            h('div', { class: 'empty-art' }, bucket({ size: 78 }).el),
             h('h2', {}, 'No movies found'),
             h('p', {}, 'Try a different search or clear the filters.'),
             h('button', { class: 'btn', onclick: () => { genre = ''; language = ''; langSelect.value = ''; drawChips(); location.hash = '#/'; load(); } }, 'Clear filters')

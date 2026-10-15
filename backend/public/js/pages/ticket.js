@@ -1,5 +1,6 @@
 import { h, svg, money, fmtDateTime } from '../dom.js';
 import { api, session } from '../api.js';
+import { bucket, colaCup } from '../snacks.js';
 
 // Decorative bars derived from the booking reference (not a scannable code)
 function bars(ref) {
@@ -38,7 +39,8 @@ export default async function ticket({ params, go }) {
           h('div', {}, h('dt', {}, 'Payment'), h('dd', {}, b.payment.method ? `${b.payment.status}, ${b.payment.method.toUpperCase()}` : b.payment.status)),
           b.user ? h('div', {}, h('dt', {}, 'Booked by'), h('dd', {}, `${b.user.name} (${b.user.email})`)) : null,
           b.payment.transaction_ref ? h('div', {}, h('dt', {}, 'Transaction'), h('dd', {}, b.payment.transaction_ref)) : null
-        )
+        ),
+        paid ? h('div', { class: 'ticket-snacks', 'aria-hidden': 'true' }, bucket({ size: 40, fill: 6 }).el, colaCup({ size: 26, fizz: false }).el, h('span', {}, 'Enjoy the show')) : null
       ),
       h('div', { class: 'stub' },
         h('div', {}, stamp),
