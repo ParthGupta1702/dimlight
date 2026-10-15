@@ -1,17 +1,22 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const movieRoutes = require('./routes/movieRoutes');
+const compression = require('compression');
+const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+// gzip JSON for faster loads (NFR-1) - but never buffer the live seat stream
+app.use(compression({ filter: (req, res) => !req.path.endsWith('/stream') && compression.filter(req, res) }));
+app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.use('/api', routes);
 
-// One router per entity (maintainability NFR)
-app.use('/api/movies', movieRoutes);
+// the website (frontend) is served from the same server: open http://localhost:5000
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(notFound);
 app.use(errorHandler);
